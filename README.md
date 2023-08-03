@@ -3,7 +3,7 @@ JavaScript-Hebrew-Calendar
 
 jQuery-Based JavaScript Hebrew Calendar
 
-This HTML and JavaScript-based app is a modernization of the KaluachJS Hebrew calendar found on http://www.kaluach.com (http://www.kaluach.com/?page_id=22).
+This HTML and JavaScript-based app is a modernization of the KaluachJS Hebrew calendar found on http://www.kaluach.net (example on a http://www.kaluach.org/).
 
 **Features**
 
@@ -15,4 +15,4 @@ This HTML and JavaScript-based app is a modernization of the KaluachJS Hebrew ca
 
 **Demo**
 
-Open the `example.js` file to use a working demo of this library.
+Open the `example.html` file to use a working demo of this library.
