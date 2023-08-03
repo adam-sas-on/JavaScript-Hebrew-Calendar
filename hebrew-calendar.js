@@ -24,10 +24,10 @@ $(document).ready(function() {
   var otherHolidays = 0;
   var jewishHolidays = 1;
   var civilHolidays = 0;
-  
+
   var calendarContainer = $('#calendar-container');
   var calendarForm = $('#calendar-form');
-  
+
   var holidaysSelect = $('#holidays', calendarForm);
   var yearField = $('#year', calendarForm);
   var monthField = $('#month', calendarForm);
@@ -39,46 +39,47 @@ $(document).ready(function() {
 
   var isMobile = function() {
     return $('body').is('.mobile');
-  }; 
+  };
 
   var initialize = function() {
-    
+
     // holidaysSelect.change(holidaysSelect_Change);
     // todayButton.click(todayButton_Click);
     // prevMonthButton.click(prevMonthButton_Click);
     // nextMonthButton.click(nextMonthButton_Click);
     // prevYearButton.click(prevYearButton_Click);
     // nextYearButton.click(nextYearButton_Click);
-  
+
     // yearField.change(yearField_Change);
-    // monthField.change(monthField_Change);
+    // monthField.change(monthField_Change);
+
 
     selectToday();
   };
-  
+
   var yearField_Change = function() {
     setCalendarFromMonthYear();
   };
-  
+
   var monthField_Change = function() {
     setCalendarFromMonthYear();
   };
-  
+
   var prevYearButton_Click = function() {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
     y -= 1;
-    
+
     setCalendar(m, y);
   };
-  
+
   var nextYearButton_Click = function() {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
     y += 1;
     setCalendar(m, y);
   };
-  
+
   var prevMonthButton_Click = function() {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
@@ -92,7 +93,7 @@ $(document).ready(function() {
 
     setCalendar(m, y);
   };
-  
+
   var nextMonthButton_Click = function() {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
@@ -106,11 +107,11 @@ $(document).ready(function() {
 
     setCalendar(m, y);
   };
-  
+
   var todayButton_Click = function () {
     selectToday();
   };
-  
+
   var holidaysSelect_Change = function() {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
@@ -134,7 +135,7 @@ $(document).ready(function() {
 
     doCal(m, y);
   }
-  
+
   var dayCell_Click = function() {
   	var rel = $(this).attr('rel');
   	var relDetail = $('.event-wrapper[rel="' + rel + '"]');
@@ -155,7 +156,7 @@ $(document).ready(function() {
     var ret = calendar(month, year);
     var calendarTable = BuildLuachHTML(ret);
     calendarContainer.empty().append(calendarTable);
-    
+
     $('td.day').click(dayCell_Click);
   }
 
@@ -219,22 +220,22 @@ $(document).ready(function() {
     var table2 = $('<table class="calendar table-body"></table>');
     var eventsList = $('<div id="calendar-list"></div>');
     var eventsListContent = '';
-    
+
     var tHead = $('<thead></thead>');
     var tBody = $('<tbody></tbody>');
-    
+
     var headerRow = $('<tr class="month-header"></tr>');
     var headerCell = $('<th colspan="7"></th>');
-    
+
     var headerText = '<span class="english">' + monthName + ' ' + cYear + '</span>';
     headerText += '<span class="hebrew">' + hebSpan + '</span>';
-    
+
     var prevMonthLink = $('<a id="previous-month"></a>').html('&lt;');
     var nextMonthLink = $('<a id="next-month"></a>').html('&gt;');
-    
+
     prevMonthLink.click(prevMonthButton_Click);
     nextMonthLink.click(nextMonthButton_Click);
-        
+
     headerCell.html(headerText).append(prevMonthLink).append(nextMonthLink);
     headerRow.append(headerCell);
     tHead.append(headerRow);
@@ -247,20 +248,20 @@ $(document).ready(function() {
       dayCell.text(weekDay[dayNum]);
       daysRow.append(dayCell);
     }
-    
+
     tHead.append(daysRow);
-    
+
     var cell = 1
     var cDay = 1
     var row;
     for (row = 1; row <= 6; row++) {
-      
+
       var weekRow = $('<tr class="week-row row-' + row + '" rel="' + cDay + '"></tr>');
-      
+
       for (var col = 1; col <= 7; col++)  {
-        
+
         var weekCell = $('<td class="day"></td>').attr('rel', cDay);
-        
+
 
         // convert civil date to hebrew
         hebDate = civ2heb(cDay, cMonth, cYear);
@@ -273,15 +274,15 @@ $(document).ready(function() {
           
         }
         else {
-          
-          
+
+
           var moed = "";
           if(jewishHolidays)
             moed = moadim(cDay, cMonth, cYear, hebDay, hMonth, col);
           var holiday = "";
           if(civilHolidays)
             holiday = holidays(cDay, cMonth, cYear);
-          
+
           var cellClass = "";
           if((cDay == tday) && (parms[3] == (tmonth+1)) && (parms[4] == tyear))
             cellClass = "current-day";
@@ -290,7 +291,7 @@ $(document).ready(function() {
           else if (holiday != "") {
             cellClass = "civil-holiday";
           }
-          
+
           weekCell.addClass(cellClass);
 
 
@@ -304,7 +305,7 @@ $(document).ready(function() {
           cellContents +=       '<div class="hebrew">';
           cellContents +=           hebDay;
           cellContents +=       '</div>';
-          
+
           var eventDetail = '';
           if (moed != "")
             eventDetail += moed;
@@ -312,7 +313,7 @@ $(document).ready(function() {
             eventDetail += '<br>';
           if (holiday != "")
             eventDetail += holiday;
-            
+
           if (!isMobile()) {
             cellContents += '<div class="events">';
             cellContents += eventDetail;
@@ -332,14 +333,14 @@ $(document).ready(function() {
               eventsListContent += '</div>';
             }
           }
-          
+
           cellContents += '</div>';
-          
+
           weekCell.html(cellContents);
 
           cDay++;
         }
-        
+
         weekRow.append(weekCell);
 
         if (cDay <= lastDate)
@@ -353,41 +354,41 @@ $(document).ready(function() {
       if(cDay > parms[2])
         break;
     }
-    
+
     table1.append(tHead);
     table2.append(tBody);
-    
+
     eventsList.html(eventsListContent);
-    
+
     container.append(table1);
     container.append(table2);
     container.append(eventsList);
-    
-    
+
+
     return container;
   }
-  
+
   var getSelectedYear = function() {
     return parseInt(yearField.val());
   };
-  
+
   var getSelectedMonthIndex = function() {
     return monthField.get(0).selectedIndex;
   };
-  
-  
+
+
   var setCalendarFromMonthYear = function () {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
     setCalendar(m, y);
   }
-  
+
   var setCalendar = function(month, year) {
     monthField.get(0).selectedIndex = month;
     yearField.val(year);
     doCal(month, year);
   };
-  
+
   var selectToday = function () {
     var now = new Date();
     var y = now.getYear();
@@ -397,7 +398,7 @@ $(document).ready(function() {
 
     setCalendar(m, y);
   };
-  
+
   initialize();
 
 });
