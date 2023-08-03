@@ -21,9 +21,9 @@
 
 $(document).ready(function() {
 
-  var otherHolidays = 0;
-  var jewishHolidays = 1;
-  var civilHolidays = 0;
+  var otherHolidays = false;
+  var jewishHolidays = true;
+  var civilHolidays = false;
 
   var calendarContainer = $('#calendar-container');
   var calendarForm = $('#calendar-form');
@@ -43,15 +43,15 @@ $(document).ready(function() {
 
   var initialize = function() {
 
-    // holidaysSelect.change(holidaysSelect_Change);
-    // todayButton.click(todayButton_Click);
-    // prevMonthButton.click(prevMonthButton_Click);
-    // nextMonthButton.click(nextMonthButton_Click);
-    // prevYearButton.click(prevYearButton_Click);
-    // nextYearButton.click(nextYearButton_Click);
+    holidaysSelect.change(holidaysSelect_Change);
+    todayButton.click(todayButton_Click);
+    prevMonthButton.click(prevMonthButton_Click);
+    nextMonthButton.click(nextMonthButton_Click);
+    prevYearButton.click(prevYearButton_Click);
+    nextYearButton.click(nextYearButton_Click);
 
-    // yearField.change(yearField_Change);
-    // monthField.change(monthField_Change);
+    yearField.change(yearField_Change);
+    monthField.change(monthField_Change);
 
 
     selectToday();
@@ -117,20 +117,20 @@ $(document).ready(function() {
     var m = getSelectedMonthIndex();
     var h = holidaysSelect.get(0).selectedIndex;
     if(h == 0) {
-      jewishHolidays = 1;
-      civilHolidays = 0;
+      jewishHolidays = true;
+      civilHolidays = false;
     }
     else if(h == 1) {
-      jewishHolidays = 0;
-      civilHolidays = 1;
+      jewishHolidays = false;
+      civilHolidays = true;
     }
     else if(h == 2) {
-      jewishHolidays = 1;
-      civilHolidays = 1;
+      jewishHolidays = true;
+      civilHolidays = true;
     }
     else if(h == 3) {
-      jewishHolidays = 0;
-      civilHolidays = 0;
+      jewishHolidays = false;
+      civilHolidays = false;
     }
 
     doCal(m, y);
@@ -145,7 +145,7 @@ $(document).ready(function() {
   };
 
   function toggleOther(form) {
-    otherHolidays = (otherHolidays == 1) ? 0 : 1;
+    otherHolidays = !otherHolidays;
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
     doCal(m, y);
@@ -166,12 +166,8 @@ $(document).ready(function() {
     var d = civMonthLength(m, y);
     var firstOfMonth = new Date (y, selM, 1);
     var startPos = firstOfMonth.getDay() + 1;
-    var retVal = new Object();
-    retVal[1] = startPos;
-    retVal[2] = d;
-    retVal[3] = m;
-    retVal[4] = y;
-    return (retVal);
+
+    return {y: y, m: m, numberOfDays: d, tableCell: startPos};
   }
 
   function BuildLuachHTML(parms)  {
@@ -182,11 +178,11 @@ $(document).ready(function() {
     var now = new Date();
     var tday = now.getDate();
     var tmonth = now.getMonth();
-    var tyear = now.getYear();
+    var tyear = now.getFullYear();
     if(tyear < 1000)
       tyear += 1900;
-    var cMonth = parms[3];
-    var cYear = parms[4];
+    var cMonth = parms.m;
+    var cYear = parms.y;
     var monthName = civMonth[cMonth];
     var lastDate = civMonthLength(cMonth, cYear);
     var hm;
@@ -195,14 +191,14 @@ $(document).ready(function() {
 
     // get starting Heb month in civil month
     hebDate = civ2heb(1, cMonth, cYear);
-    hmS = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
+    var hmS = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
     hMonth = eval(hmS.substring(0, hmS.indexOf(' ')));
     hYear = hmS.substring(hmS.indexOf(' ')+1, hmS.length);
     var start = hebMonth[hMonth+1] + ' ' + hYear;
 
     // get ending Heb month in civil month
     hebDate = civ2heb(lastDate, cMonth, cYear);
-    hmE = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
+    var hmE = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
     hMonth = eval(hmE.substring(0, hmE.indexOf(' ')));
     hYear = hmE.substring(hmE.indexOf(' ')+1, hmE.length);
     var end = hebMonth[hMonth+1] + ' ' + hYear;
@@ -267,10 +263,10 @@ $(document).ready(function() {
         hebDate = civ2heb(cDay, cMonth, cYear);
         hebDay = eval(hebDate.substring(0, hebDate.indexOf(' ')));
 
-        var hm = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
-        var hMonth = eval(hm.substring(0, hm.indexOf(' ')));
+        hm = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
+        hMonth = eval(hm.substring(0, hm.indexOf(' ')));
 
-        if (cell < parms[1]) {
+        if (cell < parms.tableCell) {
           
         }
         else {
@@ -284,7 +280,7 @@ $(document).ready(function() {
             holiday = holidays(cDay, cMonth, cYear);
 
           var cellClass = "";
-          if((cDay == tday) && (parms[3] == (tmonth+1)) && (parms[4] == tyear))
+          if((cDay == tday) && (parms.m == (tmonth+1)) && (parms.y == tyear))
             cellClass = "current-day";
           else if (moed != "")
             cellClass = "holiday";
@@ -351,7 +347,7 @@ $(document).ready(function() {
 
       tBody.append(weekRow);
 
-      if(cDay > parms[2])
+      if(cDay > parms.numberOfDays)
         break;
     }
 
@@ -391,7 +387,7 @@ $(document).ready(function() {
 
   var selectToday = function () {
     var now = new Date();
-    var y = now.getYear();
+    var y = now.getFullYear();
     var m = now.getMonth();
     if(y < 1000)
       y += 1900;
