@@ -239,27 +239,25 @@ $(document).ready(function() {
     var cYear = parms.y;
     var monthName = KDate.civMonthName(cMonth);
     var lastDate = KDate.getCivMonthLength(cMonth, cYear);
-    var hm;
     var hMonth;
     var hYear;
 
     // get starting Heb month in civil month
     hebDate = KDate.civToHeb(1, cMonth, cYear);
-    var hmS = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
-    hMonth = eval(hmS.substring(0, hmS.indexOf(' ')));
-    hYear = hmS.substring(hmS.indexOf(' ')+1, hmS.length);
-    var start = KDate.hebMonthName(hMonth+1) + ' ' + hYear;
+    var hmS = hebDate.hebMonth;
+    hYear = hebDate.hebYear;
+    var start = hebDate.monthName + ' ' + hYear;
 
     // get ending Heb month in civil month
     hebDate = KDate.civToHeb(lastDate, cMonth, cYear);
-    var hmE = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
-    hMonth = eval(hmE.substring(0, hmE.indexOf(' ')));
-    hYear = hmE.substring(hmE.indexOf(' ')+1, hmE.length);
-    var end = KDate.hebMonthName(hMonth+1) + ' ' + hYear;
+    var hmE = hebDate.hebMonth;
+    hMonth = hebDate.hebMonth;
+    hYear = hebDate.hebYear;
+    var end = hebDate.monthName + ' ' + hYear;
 
     var hebSpan;
     // check if start and end Heb months are the same
-    if(hmS == hmE)
+    if(hmS === hmE)
       hebSpan = start;
     else
       hebSpan = start + ' / ' + end
@@ -293,7 +291,7 @@ $(document).ready(function() {
     var daysRow = $('<tr class="days-header"></tr>');
 
     // create first row of table to set column width and specify week day
-    for (var dayNum = 1; dayNum < 8; ++dayNum) {
+    for (var dayNum = 0; dayNum < 7; ++dayNum) {
       var dayCell = $('<td></td>');
       dayCell.text(KDate.weekdayName(dayNum));
       daysRow.append(dayCell);
@@ -314,10 +312,8 @@ $(document).ready(function() {
 
         // convert civil date to hebrew
         hebDate = KDate.civToHeb(cDay, cMonth, cYear);
-        hebDay = eval(hebDate.substring(0, hebDate.indexOf(' ')));
-
-        hm = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
-        hMonth = eval(hm.substring(0, hm.indexOf(' ')));
+        hebDay = hebDate.hebDay;
+        hMonth = hebDate.hebMonth;
 
         if (cell < parms.tableCell) {
           
@@ -373,7 +369,7 @@ $(document).ready(function() {
               eventsListContent += '<div class="date">';
               eventsListContent += KDate.civMonthName(cMonth) + ' ' + cDay;
               eventsListContent += ' / ';
-              eventsListContent += KDate.hebMonthName(hMonth+1) + ' ' + hebDay;
+              eventsListContent += hebDate.monthName + ' ' + hebDay;
               eventsListContent += '</div>';
               eventsListContent += '<div class="event-detail">';
               eventsListContent += eventDetail;

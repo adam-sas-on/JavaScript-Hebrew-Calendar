@@ -137,7 +137,7 @@ var KDate = (function() {
         if(m == 11)			// Adar?
             m += adarType;	// adjust for Adars
 
-        return (d + ' ' + m + ' ' + hy);
+        return {hebDay: d, hebMonth: m, hebYear: hy, monthName: (m>=0 && m<hebMonth.length)? hebMonth[m] : ""};
     }
 
 
@@ -155,10 +155,7 @@ var KDate = (function() {
         var M = 3 + Math.floor((L + 40) / 44);
         var D = L + 28 - 31 * Math.floor(M / 4);
 
-        var ret = new Object();
-        ret[1] = M;
-        ret[2] = D;
-        return ret;
+        return {month: M, day: D};
     }
 
     /**
@@ -210,7 +207,7 @@ var KDate = (function() {
             return "St. Patrick's Day";
         else if (cmonth == 3 || cmonth == 4) {
             var e = Easter(cyear);
-            if (cmonth == e[1] && cday == e[2])
+            if (cmonth == e.month && cday == e.day)
                 return "Easter";
         }
         else if (cmonth == 5 && cday == NthDOW(2, 1, 5, cyear))
@@ -277,7 +274,7 @@ var KDate = (function() {
                 else
                     cday -= 3;
                 var hdate = civ2heb(cday, cmonth, cyear);
-                hd = eval(hdate.substring(0, hdate.indexOf(' ')));
+                hd = hdate.hebDay;
                 if(hd == 29)
                     return "Chanukkah"
             }
@@ -352,8 +349,12 @@ var KDate = (function() {
             return new KDate();
         },
         hebMonthName: (hebMth) => hebMonth[hebMth],
-        civMonthName: (month) => civMonth[month],
-        weekdayName: (dayNumber) => weekDay[dayNumber],
+        civMonthName: (month) => {
+            return (month > 0 && month <= civMonth.length) ? civMonth[month-1] : "";
+        },
+        weekdayName: (dayNumber) => {
+            return (dayNumber >= 0 && dayNumber < weekDay.length)? weekDay[dayNumber] : "";
+        },
         getCivMonthLength: (month, year) => civMonthLength(month, year),
         civToHeb: (day, month, year) => civ2heb(day, month, year),
         holiday: (civDay, civMonth, civYear) => holidays(civDay, civMonth, civYear),
