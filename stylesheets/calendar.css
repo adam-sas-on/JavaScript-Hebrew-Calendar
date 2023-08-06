@@ -16,6 +16,7 @@ table.calendar th, table.calendar td {
 }
 /* line 24, ../sass/calendar.scss */
 table.calendar thead tr.month-header {
+  position: relative;
   font-size: 1.3em;
 }
 /* line 29, ../sass/calendar.scss */

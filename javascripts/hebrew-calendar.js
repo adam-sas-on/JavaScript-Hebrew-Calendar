@@ -20,7 +20,7 @@
  */
 
 $(document).ready(function() {
-
+  KDate.getInstance();
   var otherHolidays = false;
   var jewishHolidays = true;
   var civilHolidays = false;
@@ -217,7 +217,7 @@ $(document).ready(function() {
   function calendar(selM, selY) {
     var m = selM + 1;
     var y = selY;
-    var d = civMonthLength(m, y);
+    var d = KDate.getCivMonthLength(m, y);
     var firstOfMonth = new Date (y, selM, 1);
     var startPos = firstOfMonth.getDay() + 1;
 
@@ -237,25 +237,25 @@ $(document).ready(function() {
       tyear += 1900;
     var cMonth = parms.m;
     var cYear = parms.y;
-    var monthName = civMonth[cMonth];
-    var lastDate = civMonthLength(cMonth, cYear);
+    var monthName = KDate.civMonthName(cMonth);
+    var lastDate = KDate.getCivMonthLength(cMonth, cYear);
     var hm;
     var hMonth;
     var hYear;
 
     // get starting Heb month in civil month
-    hebDate = civ2heb(1, cMonth, cYear);
+    hebDate = KDate.civToHeb(1, cMonth, cYear);
     var hmS = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
     hMonth = eval(hmS.substring(0, hmS.indexOf(' ')));
     hYear = hmS.substring(hmS.indexOf(' ')+1, hmS.length);
-    var start = hebMonth[hMonth+1] + ' ' + hYear;
+    var start = KDate.hebMonthName(hMonth+1) + ' ' + hYear;
 
     // get ending Heb month in civil month
-    hebDate = civ2heb(lastDate, cMonth, cYear);
+    hebDate = KDate.civToHeb(lastDate, cMonth, cYear);
     var hmE = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
     hMonth = eval(hmE.substring(0, hmE.indexOf(' ')));
     hYear = hmE.substring(hmE.indexOf(' ')+1, hmE.length);
-    var end = hebMonth[hMonth+1] + ' ' + hYear;
+    var end = KDate.hebMonthName(hMonth+1) + ' ' + hYear;
 
     var hebSpan;
     // check if start and end Heb months are the same
@@ -295,7 +295,7 @@ $(document).ready(function() {
     // create first row of table to set column width and specify week day
     for (var dayNum = 1; dayNum < 8; ++dayNum) {
       var dayCell = $('<td></td>');
-      dayCell.text(weekDay[dayNum]);
+      dayCell.text(KDate.weekdayName(dayNum));
       daysRow.append(dayCell);
     }
 
@@ -308,13 +308,12 @@ $(document).ready(function() {
 
       var weekRow = $('<tr class="week-row row-' + row + '" rel="' + cDay + '"></tr>');
 
-      for (var col = 1; col <= 7; col++)  {
-
+      for (var col = 1; col <= 7; col++) {
         var weekCell = $('<td class="day"></td>').attr('rel', cDay);
 
 
         // convert civil date to hebrew
-        hebDate = civ2heb(cDay, cMonth, cYear);
+        hebDate = KDate.civToHeb(cDay, cMonth, cYear);
         hebDay = eval(hebDate.substring(0, hebDate.indexOf(' ')));
 
         hm = hebDate.substring(hebDate.indexOf(' ')+1, hebDate.length);
@@ -325,13 +324,12 @@ $(document).ready(function() {
         }
         else {
 
-
           var moed = "";
           if(jewishHolidays)
-            moed = moadim(cDay, cMonth, cYear, hebDay, hMonth, col);
+            moed = KDate.moed(cDay, cMonth, cYear, hebDay, hMonth, col);
           var holiday = "";
           if(civilHolidays)
-            holiday = holidays(cDay, cMonth, cYear);
+            holiday = KDate.holiday(cDay, cMonth, cYear);
 
           var cellClass = "";
           if((cDay == tday) && (parms.m == (tmonth+1)) && (parms.y == tyear))
@@ -373,9 +371,9 @@ $(document).ready(function() {
             if (eventDetail.length > 0) {
               eventsListContent += '<div class="event-wrapper ' + cellClass + '" rel="' + cDay + '">';
               eventsListContent += '<div class="date">';
-              eventsListContent += civMonth[cMonth] + ' ' + cDay;
+              eventsListContent += KDate.civMonthName(cMonth) + ' ' + cDay;
               eventsListContent += ' / ';
-              eventsListContent += hebMonth[hMonth + 1] + ' ' + hebDay;
+              eventsListContent += KDate.hebMonthName(hMonth+1) + ' ' + hebDay;
               eventsListContent += '</div>';
               eventsListContent += '<div class="event-detail">';
               eventsListContent += eventDetail;
