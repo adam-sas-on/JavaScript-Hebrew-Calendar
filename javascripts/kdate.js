@@ -161,6 +161,15 @@ function Easter(Y) {
   return ret;
 }
 
+/**
+ * 	Day of week for defined day, month and year
+ *
+ * @param day {number}: day of month from 1 to 31;
+ * @param month {number}: month of year from 1 to 12 where 1 means January;
+ * @param year {number}
+ * @returns {number}: day in a week as a number from 1 to 7 for defined date where 1 means Sunday;
+ * @constructor
+ */
 function DOW(day,month,year) {
   var a = Math.floor((14 - month)/12);
   var y = year - a;
@@ -170,6 +179,16 @@ function DOW(day,month,year) {
   return d + 1;
 }
 
+/**
+ * 	Day of month in a year when n-th day of week (weekday) occurs
+ *
+ * @param nth: weekday counter >= 1;
+ * @param weekday: day in a week as a number from 1 to 7 where 1 means Sunday;
+ * @param month {number}:  month of year from 1 to 12 where 1 means January;
+ * @param year
+ * @returns {number}: day of month when n-th day of week called weekday occurs. Range of value is from 1 to 31;
+ * @constructor
+ */
 function NthDOW(nth,weekday,month,year) {
   if (nth > 0)
     return (nth - 1) * 7 + 1 + (7 + weekday - DOW((nth - 1) * 7 + 1, month, year)) % 7;

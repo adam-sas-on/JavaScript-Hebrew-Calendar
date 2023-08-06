@@ -41,6 +41,10 @@ $(document).ready(function() {
     return $('body').is('.mobile');
   };
 
+  /**
+   * 	Set events for form inputs for calendar
+   * and create one for current year and month.
+   */
   var initialize = function() {
 
     holidaysSelect.change(holidaysSelect_Change);
@@ -57,14 +61,26 @@ $(document).ready(function() {
     selectToday();
   };
 
+  /**
+   * 	Update calendar after change of year
+   * in form input for year.
+   */
   var yearField_Change = function() {
     setCalendarFromMonthYear();
   };
 
+  /**
+   * 	Update calendar after change of month
+   *  in a <select> list of options.
+   */
   var monthField_Change = function() {
     setCalendarFromMonthYear();
   };
 
+  /**
+   * 	Update calendar after request for previous year
+   * to currently filled in a form.
+   */
   var prevYearButton_Click = function() {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
@@ -73,6 +89,10 @@ $(document).ready(function() {
     setCalendar(m, y);
   };
 
+  /**
+   * 	Update calendar after request for next year
+   * to currently filled in a form.
+   */
   var nextYearButton_Click = function() {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
@@ -80,6 +100,10 @@ $(document).ready(function() {
     setCalendar(m, y);
   };
 
+  /**
+   * 	Update calendar after request for previous month
+   * to currently filled in a form.
+   */
   var prevMonthButton_Click = function() {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
@@ -94,6 +118,10 @@ $(document).ready(function() {
     setCalendar(m, y);
   };
 
+  /**
+   * 	Update calendar after request for next month
+   *  to currently filled in a form.
+   */
   var nextMonthButton_Click = function() {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
@@ -108,10 +136,19 @@ $(document).ready(function() {
     setCalendar(m, y);
   };
 
+  /**
+   * 	Update calendar after click of button for current day.
+   */
   var todayButton_Click = function () {
     selectToday();
   };
 
+  /**
+   *	Update calendar after change of preferred group of holidays to display.
+   *  Groups of holidays are listed in form-select as sorted list of options:
+   *  "Jewish", "Civil", "All" and option of nothing to display.
+   *  Method gets index of option and interprets its value as corresponding category.
+   */
   var holidaysSelect_Change = function() {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
@@ -136,6 +173,10 @@ $(document).ready(function() {
     doCal(m, y);
   }
 
+  /**
+   * 	Scrolls to description of clicked day,
+   * commonly used in mobile devices.
+   */
   var dayCell_Click = function() {
   	var rel = $(this).attr('rel');
   	var relDetail = $('.event-wrapper[rel="' + rel + '"]');
@@ -151,7 +192,13 @@ $(document).ready(function() {
     doCal(m, y);
   }
 
-
+  /**
+   * 	Calculate required properties, create calendar table af month
+   * and update it in calendar content block.
+   * Make all cells of days clickable (for mobiles) to show details for specific day if it is a holiday or national occasion.
+   * @param month {number}: zero-based value of month;
+   * @param year: 4-digit value of year
+   */
   function doCal(month, year) {
     var ret = calendar(month, year);
     var calendarTable = BuildLuachHTML(ret);
@@ -160,6 +207,13 @@ $(document).ready(function() {
     $('td.day').click(dayCell_Click);
   }
 
+  /**
+   * 	Get object with year, mont as number from 1 to 12, number of days for month
+   * and number from 1 to 7 of column for first day of month (day of week as number from 1 to 7).
+   * @param selM {number}: zero-based value of month;
+   * @param selY: 4-digit value of year;
+   * @returns {{tableCell: number, y, numberOfDays: (*|number), m: *}}
+   */
   function calendar(selM, selY) {
     var m = selM + 1;
     var y = selY;
@@ -364,27 +418,49 @@ $(document).ready(function() {
     return container;
   }
 
+  /**
+   * 	Get value from form input of year.
+   * @returns {number}
+   */
   var getSelectedYear = function() {
     return parseInt(yearField.val());
   };
 
+  /**
+   *	Get selected index of form-select for months;
+   * assumption is that <select> list is sorted and January is the first of the list.
+   * @returns {number|number|*}
+   */
   var getSelectedMonthIndex = function() {
     return monthField.get(0).selectedIndex;
   };
 
-
+  /**
+   * 	Get values from form of year and month
+   * and update calendar view.
+   */
   var setCalendarFromMonthYear = function () {
     var y = getSelectedYear();
     var m = getSelectedMonthIndex();
     setCalendar(m, y);
   }
 
+  /**
+   * 	Sets form values of the year and month,
+   * create table view of the calendar.
+   * @param month: zero-based value of month;
+   * @param year: 4 digit value of year;
+   */
   var setCalendar = function(month, year) {
     monthField.get(0).selectedIndex = month;
     yearField.val(year);
     doCal(month, year);
   };
 
+  /**
+   * Sets values of form to current year and month,
+   * create table view of the calendar.
+   */
   var selectToday = function () {
     var now = new Date();
     var y = now.getFullYear();
