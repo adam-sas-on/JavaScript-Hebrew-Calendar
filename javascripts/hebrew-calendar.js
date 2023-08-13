@@ -29,6 +29,9 @@ $(document).ready(function() {
   var calendarForm = $('#calendar-form');
 
   var holidaysSelect = $('#holidays', calendarForm);
+  if( holidaysSelect.get(0) )
+    holidaysSelect.get(0).selectedIndex = 0;
+
   var yearField = $('#year', calendarForm);
   var monthField = $('#month', calendarForm);
   var prevMonthButton = $('#prev-month', calendarForm);
@@ -201,10 +204,10 @@ $(document).ready(function() {
    */
   function doCal(month, year) {
     var ret = calendar(month, year);
-    var calendarTable = BuildLuachHTML(ret);
+    var calendarTable = BuildLuachDOM(ret);// BuildLuachHTML(ret);
     calendarContainer.empty().append(calendarTable);
 
-    $('td.day').click(dayCell_Click);
+    // $('td.day').click(dayCell_Click);
   }
 
   /**
@@ -409,6 +412,179 @@ $(document).ready(function() {
     container.append(eventsList);
 
 
+    return container;
+  }
+
+
+  function createEventDetailNode(moed, holiday, nodeClass){
+    var eventNode = document.createElement("div");
+    eventNode.className = nodeClass;
+
+    if(moed.length > 0){
+      eventNode.appendChild(document.createTextNode(moed) );
+      if(holiday.length > 0)
+        eventNode.appendChild(document.createElement("br") );
+    }
+    if(holiday.length > 0)
+      eventNode.appendChild(document.createTextNode(holiday) );
+    return eventNode;
+  }
+
+  function BuildLuachDOM(parms){
+    var calendarDays = KDate.civMonthToHeb(parms.m, parms.y);
+    var table1, table2, eventsList;
+    var hebSpan = "";
+    var i = 0, daysCount = calendarDays.length;
+
+    while(i < daysCount && calendarDays[i].civM !== parms.m)
+      i++;
+
+    daysCount--;
+    while(daysCount > i && calendarDays[daysCount].civM !== parms.m)
+      daysCount--;
+
+    if(i <= daysCount && daysCount >= 0){
+      hebSpan = "" + calendarDays[i].monthName + " " + calendarDays[i].hebYear;
+      if(calendarDays[i].hebMonth !== calendarDays[daysCount].hebMonth){
+        hebSpan += " / " + calendarDays[daysCount].monthName + " " + calendarDays[daysCount].hebYear;
+      }
+    }
+
+    table1 = document.createElement("table");
+    table1.className = "calendar table-header";
+    table2 = document.createElement("table");
+    table2.className = "calendar table-body";
+    eventsList = document.createElement("div");
+    eventsList.id = "calendar-list";
+
+    var tHead = table1.createTHead();
+
+    var tRow = tHead.insertRow();
+    tRow.className = "month-header";
+    var tCell = document.createElement("th");
+    tCell.colSpan = 7;
+    tRow.appendChild(tCell);
+
+    // - - - Creating header information about months with links
+    var monthLink = document.createElement("a");
+    monthLink.id = "previous-month";
+    monthLink.appendChild(document.createTextNode("<") );
+    monthLink.addEventListener("click", prevMonthButton_Click, false);
+    tCell.appendChild(monthLink);
+
+    var domNode = document.createElement("span");
+    domNode.className = "english";
+    domNode.appendChild(document.createTextNode("" + KDate.civMonthName(parms.m) + " " + parms.y) );
+    tCell.appendChild(domNode);
+
+    domNode = document.createElement("span");
+    domNode.className = "hebrew";
+    domNode.appendChild(document.createTextNode(hebSpan) );// e.g.: Elul 5783 / Tishrei 5784;
+    tCell.appendChild(domNode);
+
+    monthLink = document.createElement("a");
+    monthLink.id = "next-month";
+    monthLink.appendChild(document.createTextNode(">") );
+    monthLink.addEventListener("click", nextMonthButton_Click, false);
+    tCell.appendChild(monthLink);
+
+    tRow = tHead.insertRow();
+    tRow.className = "days-header";
+    for(i = 0; i < 7; i++){
+      tCell = tRow.insertCell();
+      tCell.appendChild(document.createTextNode(KDate.weekdayName(i)) );
+    }
+
+
+    var weekRow, row = 1;
+    var tBody = table2.createTBody();
+    daysCount = calendarDays.length;
+    hebSpan = new Date();
+    var tDay = hebSpan.getDate(), tMonth = hebSpan.getMonth(), tYear = hebSpan.getFullYear();
+
+    for(i=0; i < daysCount; i++){
+      if(calendarDays[i].dayNumber === 0 || i === 0){
+        weekRow = tBody.insertRow();
+        weekRow.className = "week-row row-"+row;
+        weekRow.setAttribute('rel', "1");
+        row++;
+      }
+
+      let dayCell=weekRow.insertCell();
+      dayCell.className = "day";
+      if(calendarDays[i].civM == parms.m){
+        dayCell.setAttribute('rel', calendarDays[i].civDay);
+        dayCell.addEventListener("click", dayCell_Click, false);// replaces  $('td.day').click(dayCell_Click);
+      } else
+        dayCell.style.fontSize = "0.8em";
+
+      let cellContent = document.createElement("div"), dayNode;
+      cellContent.className = "cell-contents";
+      dayNode = document.createElement("div");
+      dayNode.className = "english";
+      dayNode.appendChild(document.createTextNode(calendarDays[i].civDay) );
+      cellContent.appendChild(dayNode);
+      dayNode = document.createElement("div");
+      dayNode.className = "hebrew";
+      dayNode.appendChild(document.createTextNode(calendarDays[i].hebDay) );
+      cellContent.appendChild(dayNode);
+
+      dayCell.appendChild(cellContent);
+
+      if(calendarDays[i].civM == parms.m){
+        // add detail about holiday/-s;
+        let  moed = "", holiday = "";
+        if(jewishHolidays)
+          moed = KDate.moed(calendarDays[i].civDay, calendarDays[i].civM, calendarDays[i].civY,
+              calendarDays[i].hebDay, calendarDays[i].hebMonth, calendarDays[i].dayNumber+1);
+        if(civilHolidays)
+          holiday = KDate.holiday(calendarDays[i].civDay, calendarDays[i].civM, calendarDays[i].civY);
+
+        let cellClass = "";
+        if(calendarDays[i].civDay === tDay && calendarDays[i].civM === (tMonth+1) && calendarDays[i].civY === tYear)
+          cellClass = "current-day";
+        else if(moed.length > 0)
+          cellClass = "holiday";
+        else if(holiday.length > 0)
+          cellClass = "civil-holiday";
+
+        if(cellClass.length > 0)
+          dayCell.className = dayCell.className + " " + cellClass;// dayCell.classList.add(cellClass);
+
+
+        if(moed.length > 0 || holiday.length > 0){
+          if(!isMobile() ){
+            dayNode = createEventDetailNode(moed, holiday, "events");
+
+            cellContent.appendChild(dayNode);
+          } else {
+            // mobile device;
+            cellContent = document.createElement("div");
+            cellContent.className = "event-wrapper "+cellClass;
+            cellContent.setAttribute('rel', "" + calendarDays[i].civDay);
+
+            domNode = document.createElement("div");
+            domNode.className = "date";
+            hebSpan = KDate.civMonthName(parms.m) + " " + calendarDays[i].civDay + " / ";
+            hebSpan+= calendarDays[i].monthName + " " + calendarDays[i].hebDay;
+            domNode.appendChild(document.createTextNode(hebSpan) );
+            cellContent.appendChild(domNode);
+
+            domNode = createEventDetailNode(moed, holiday, "event-detail");
+            cellContent.appendChild(domNode);
+            eventsList.appendChild(cellContent);
+          }
+        }
+
+      }
+
+    }
+
+    var container=document.createElement("div");
+    container.id = "calendar-wrapper";
+    container.appendChild(table1);
+    container.appendChild(table2);
+    container.appendChild(eventsList);
     return container;
   }
 
