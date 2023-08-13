@@ -15,7 +15,7 @@
  */
 
 var KDate = (function() {
-    var hebMonth, civMonth, weekDay;
+    var hebMonth, civMonth, weekDays;
     var instance;
 
     function KDate(){
@@ -26,7 +26,7 @@ var KDate = (function() {
                 'Tishrei', 'Cheshvan', 'Kislev', 'Tevet', 'Shevat', 'Adar', 'Adar I', 'Adar II'];
             civMonth = ['January', 'February', 'March', 'April', 'May', 'June',
                 'July', 'August', 'September', 'October', 'November', 'December'];
-            weekDay = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sh'];
+            weekDays = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sh'];
         }
 
         return instance;
@@ -72,6 +72,14 @@ var KDate = (function() {
             return 31;
     }
 
+    /**
+     * 	Converts international standard date for civil use into Hebrew date as objects of parts.
+     *
+     * @param day: a day as number from 1 to 31 (depending on month and year);
+     * @param month: month number from 1 to 12;
+     * @param year
+     * @returns {{hebMonth: number, hebYear, hebDay, monthName: (*|string)}}
+     */
     function civ2heb(day, month, year) {
         var d = day;
         var	m = month;
@@ -140,6 +148,89 @@ var KDate = (function() {
         return {hebDay: d, hebMonth: m, hebYear: hy, monthName: (m>=0 && m<hebMonth.length)? hebMonth[m] : ""};
     }
 
+    /**
+     * 	Get date of last Sunday before 1-st day of month in a year.
+     * @param month {number}: month number from 1 to 12;
+     * @param year
+     * @returns {{month, year, day: number, remainDays: number}}
+     */
+    function sundayForMonthStart(month, year){
+        var date = new Date(year, month-1, 1), day = date.getDay(),
+            result = {month: month, year: year, day: 1, remainDays: day};
+
+        if(day > 0){
+            date.setDate(date.getDate() - day);
+            result.month = 12 - (13-month) % 12;
+            result.year = date.getFullYear();
+            result.day = date.getDate();
+        }
+        return result;
+    }
+    function daysToNextSaturday(month, year){
+        var date = new Date(year, month, 0);
+        return 6 - date.getDay();// end -> exp: Su -> 6, Mo -> 5, Tu -> 4, We -> 3, Th -> 2, Fr -> 1, Sa -> 0;
+    }
+
+    /**
+     *
+     * @param month
+     * @param year
+     * @returns {*[]}
+     */
+    function civilMonth2hebrewList(month, year){
+        var element, hebDate, result = [], firstDay = sundayForMonthStart(month, year);
+        var i, dayNumber = 0;
+
+        for(i = dayNumber = 0; i < firstDay.remainDays; i++){
+            element = {civY: firstDay.year, civM: firstDay.month, civDay: firstDay.day+i, dayNumber: dayNumber,
+                hebYear: "", hebMonth: "", hebDay: "", monthName: ""};
+            result.push(element);
+            dayNumber = (dayNumber + 1)%7;
+        }
+
+        element = {civY: year, civM: month, civDay: 1, dayNumber: dayNumber};
+        dayNumber = (dayNumber + 1)%7;
+        result.push(element);
+        hebDate = civ2heb(result[0].civDay, result[0].civM, result[0].civY);
+        Object.assign(result[0], hebDate);
+
+        for(i = 1; i < result.length; i++){
+            if(hebDate.hebDay > 28){
+                hebDate = civ2heb(result[i].civDay, result[i].civM, result[i].civY);
+            } else
+                hebDate.hebDay = hebDate.hebDay + 1;
+
+            Object.assign(result[i], hebDate);
+        }
+
+        var countDays = civMonthLength(month, year);
+        for(i = 2; i <= countDays; i++){
+            element = {civY: year, civM: month, civDay: i, dayNumber: dayNumber};
+            if(hebDate.hebDay > 28){
+                hebDate = civ2heb(i, month, year);
+            } else
+                hebDate.hebDay = hebDate.hebDay + 1;
+
+            Object.assign(element, hebDate);
+            result.push(element);
+            dayNumber = (dayNumber + 1)%7;
+        }
+
+        firstDay = (month === 12) ? {y: year+1, m: 1} : {y: year, m: month+1};
+        countDays = daysToNextSaturday(month, year);
+        for(i = 1; i <= countDays; i++){
+            element = {civY: firstDay.y, civM: firstDay.m, civDay: i, dayNumber: dayNumber};
+            if(hebDate.hebDay > 28){
+                hebDate = civ2heb(i, firstDay.m, firstDay.y);
+            } else
+                hebDate.hebDay = hebDate.hebDay + 1;
+
+            Object.assign(element, hebDate);
+            result.push(element);
+            dayNumber = (dayNumber + 1)%7;
+        }
+        return result;
+    }
 
     function Easter(Y) {
         // based on the algorithm of Oudin
@@ -353,10 +444,13 @@ var KDate = (function() {
             return (month > 0 && month <= civMonth.length) ? civMonth[month-1] : "";
         },
         weekdayName: (dayNumber) => {
-            return (dayNumber >= 0 && dayNumber < weekDay.length)? weekDay[dayNumber] : "";
+            return (dayNumber >= 0 && dayNumber < weekDays.length)? weekDays[dayNumber] : "";
         },
         getCivMonthLength: (month, year) => civMonthLength(month, year),
         civToHeb: (day, month, year) => civ2heb(day, month, year),
+        civMonthToHeb: function(month, year){
+            return civilMonth2hebrewList(month, year);
+        },
         holiday: (civDay, civMonth, civYear) => holidays(civDay, civMonth, civYear),
         moed: (civilDay, civilMonth, civilYear, hebrewDay, hebrewMonth, dayOfWeek) => moadim(civilDay, civilMonth, civilYear, hebrewDay, hebrewMonth, dayOfWeek)
     };
