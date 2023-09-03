@@ -416,6 +416,26 @@ $(document).ready(function() {
   }
 
 
+  function generateHebrewDateRangeString(calendarDays, civilMonth){
+    var str = "";
+    var i = 0, j = calendarDays.length;
+
+    while(i < j && calendarDays[i].civM !== civilMonth)
+      i++;
+
+    j--;
+    while(j >= i && calendarDays[j].civM !== civilMonth)
+      j--;
+
+    if(i <= j && j >= 0){
+      str = "" + calendarDays[i].monthName + " " + calendarDays[i].hebYear;
+      if(calendarDays[i].hebMonth !== calendarDays[j].hebMonth)
+        str += " / " + calendarDays[j].monthName + " " + calendarDays[j].hebYear;
+    }
+
+    return str;
+  }
+
   function createEventDetailNode(moed, holiday, nodeClass){
     var eventNode = document.createElement("div");
     eventNode.className = nodeClass;
@@ -433,22 +453,6 @@ $(document).ready(function() {
   function BuildLuachDOM(parms){
     var calendarDays = KDate.civMonthToHeb(parms.m, parms.y);
     var table1, table2, eventsList;
-    var hebSpan = "";
-    var i = 0, daysCount = calendarDays.length;
-
-    while(i < daysCount && calendarDays[i].civM !== parms.m)
-      i++;
-
-    daysCount--;
-    while(daysCount > i && calendarDays[daysCount].civM !== parms.m)
-      daysCount--;
-
-    if(i <= daysCount && daysCount >= 0){
-      hebSpan = "" + calendarDays[i].monthName + " " + calendarDays[i].hebYear;
-      if(calendarDays[i].hebMonth !== calendarDays[daysCount].hebMonth){
-        hebSpan += " / " + calendarDays[daysCount].monthName + " " + calendarDays[daysCount].hebYear;
-      }
-    }
 
     table1 = document.createElement("table");
     table1.className = "calendar table-header";
@@ -477,6 +481,7 @@ $(document).ready(function() {
     domNode.appendChild(document.createTextNode("" + KDate.civMonthName(parms.m) + " " + parms.y) );
     tCell.appendChild(domNode);
 
+    var hebSpan = generateHebrewDateRangeString(calendarDays, parms.m);
     domNode = document.createElement("span");
     domNode.className = "hebrew";
     domNode.appendChild(document.createTextNode(hebSpan) );// e.g.: Elul 5783 / Tishrei 5784;
@@ -490,7 +495,7 @@ $(document).ready(function() {
 
     tRow = tHead.insertRow();
     tRow.className = "days-header";
-    for(i = 0; i < 7; i++){
+    for(var i = 0; i < 7; i++){
       tCell = tRow.insertCell();
       tCell.appendChild(document.createTextNode(KDate.weekdayName(i)) );
     }
@@ -498,7 +503,7 @@ $(document).ready(function() {
 
     var weekRow, row = 1;
     var tBody = table2.createTBody();
-    daysCount = calendarDays.length;
+    var daysCount = calendarDays.length;
     hebSpan = new Date();
     var tDay = hebSpan.getDate(), tMonth = hebSpan.getMonth(), tYear = hebSpan.getFullYear();
 
